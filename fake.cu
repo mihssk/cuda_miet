@@ -243,33 +243,33 @@ void task2()
         print_n_vec(vec2h, 16);
 
         cudaEvent_t start1, end1;
-        cudaEventCreate(&start1);
-        cudaEventCreate(&end1);
+        CUDA_CHECK(cudaEventCreate(&start1));
+        CUDA_CHECK(cudaEventCreate(&end1));
         cudaEvent_t start2, end2;
-        cudaEventCreate(&start2);
-        cudaEventCreate(&end2);
+        CUDA_CHECK(cudaEventCreate(&start2));
+        CUDA_CHECK(cudaEventCreate(&end2));
 
         dim3 grid_size(n / BLOCK_SIZE + ((n % BLOCK_SIZE) > 0));
 
         SYNC_D
-        cudaEventRecord(start1);
-        cudaMalloc((void**) &vec1d, sizeof(float) * n);
-        cudaMalloc((void**) &vec2d, sizeof(float) * n);
-        cudaMalloc((void**) &vec3d, sizeof(float) * n);
+        CUDA_CHECK(cudaEventRecord(start1));
+        CUDA_CHECK(cudaMalloc((void**) &vec1d, sizeof(float) * n));
+        CUDA_CHECK(cudaMalloc((void**) &vec2d, sizeof(float) * n));
+        CUDA_CHECK(cudaMalloc((void**) &vec3d, sizeof(float) * n));
 
-        cudaMemcpy(vec1d, vec1h, sizeof(float) * n, cudaMemcpyHostToDevice);
-        cudaMemcpy(vec2d, vec2h, sizeof(float) * n, cudaMemcpyHostToDevice);
+        CUDA_CHECK(cudaMemcpy(vec1d, vec1h, sizeof(float) * n, cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(vec2d, vec2h, sizeof(float) * n, cudaMemcpyHostToDevice));
 
 
-        cudaEventRecord(start2);
+        CUDA_CHECK(cudaEventRecord(start2));
 
         addKer<<<grid_size, BLOCK_SIZE>>>(vec1d, vec2d, vec3d, n);
 
-        cudaEventRecord(end2);
+        CUDA_CHECK(cudaEventRecord(end2));
 
-        cudaMemcpy(vec3h, vec3d, sizeof(float) * n, cudaMemcpyDeviceToHost);
-        cudaEventRecord(end1);
-        cudaEventSynchronize(end1);
+        CUDA_CHECK(cudaMemcpy(vec3h, vec3d, sizeof(float) * n, cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaEventRecord(end1));
+        CUDA_CHECK(cudaEventSynchronize(end1));
         SYNC_D
         print_n_vec(vec3h, 16);
         cout << endl;
@@ -278,11 +278,11 @@ void task2()
 
         float gpu_time = 0;
 
-        cudaEventElapsedTime(&gpu_time, start1, end1);
+        CUDA_CHECK(cudaEventElapsedTime(&gpu_time, start1, end1));
         cout << "total time elapsed in GPU ms: " << gpu_time << endl;
         gpu_total << gpu_time << endl;
 
-        cudaEventElapsedTime(&gpu_time, start2, end2);
+        CUDA_CHECK(cudaEventElapsedTime(&gpu_time, start2, end2));
         cout << "time elapsed in GPU kernel ms: " << gpu_time << endl;
         gpu_ker  << gpu_time << endl;
 
@@ -297,13 +297,13 @@ void task2()
         delete[] vec3h;
         delete[] vec3hh;
 
-        cudaFree(vec1d);
-        cudaFree(vec2d);
-        cudaFree(vec3d);
-        cudaEventDestroy(start1);
-        cudaEventDestroy(end1);
-        cudaEventDestroy(start2);
-        cudaEventDestroy(end2);
+        CUDA_CHECK(cudaFree(vec1d));
+        CUDA_CHECK(cudaFree(vec2d));
+        CUDA_CHECK(cudaFree(vec3d));
+        CUDA_CHECK(cudaEventDestroy(start1));
+        CUDA_CHECK(cudaEventDestroy(end1));
+        CUDA_CHECK(cudaEventDestroy(start2));
+        CUDA_CHECK(cudaEventDestroy(end2));
     }
     cpu_time.close();
     gpu_total.close();
@@ -340,18 +340,18 @@ void task3()
 
 
         cudaEvent_t start2, end2;
-        cudaEventCreate(&start2);
-        cudaEventCreate(&end2);
+        CUDA_CHECK(cudaEventCreate(&start2));
+        CUDA_CHECK(cudaEventCreate(&end2));
 
         dim3 grid_size(n / Bs[i] + ((n % Bs[i]) > 0));
 
 
-        cudaMalloc((void**) &vec1d, sizeof(float) * n);
-        cudaMalloc((void**) &vec2d, sizeof(float) * n);
-        cudaMalloc((void**) &vec3d, sizeof(float) * n);
+        CUDA_CHECK(cudaMalloc((void**) &vec1d, sizeof(float) * n));
+        CUDA_CHECK(cudaMalloc((void**) &vec2d, sizeof(float) * n));
+        CUDA_CHECK(cudaMalloc((void**) &vec3d, sizeof(float) * n));
 
-        cudaMemcpy(vec1d, vec1h, sizeof(float) * n, cudaMemcpyHostToDevice);
-        cudaMemcpy(vec2d, vec2h, sizeof(float) * n, cudaMemcpyHostToDevice);
+        CUDA_CHECK(cudaMemcpy(vec1d, vec1h, sizeof(float) * n, cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(vec2d, vec2h, sizeof(float) * n, cudaMemcpyHostToDevice));
 
 
         cudaEventRecord(start2);
@@ -360,9 +360,9 @@ void task3()
         addKer<<<grid_size, Bs[i]>>>(vec1d, vec2d, vec3d, n);
         SYNC_D
 
-        cudaEventRecord(end2);
+        CUDA_CHECK(cudaEventRecord(end2));
 
-        cudaMemcpy(vec3h, vec3d, sizeof(float) * n, cudaMemcpyDeviceToHost);
+        CUDA_CHECK(cudaMemcpy(vec3h, vec3d, sizeof(float) * n, cudaMemcpyDeviceToHost));
 
         print_n_vec(vec3h, 16);
         cout << endl;
@@ -373,7 +373,7 @@ void task3()
         float gpu_time = 0;
 
 
-        cudaEventElapsedTime(&gpu_time, start2, end2);
+        CUDA_CHECK(cudaEventElapsedTime(&gpu_time, start2, end2));
         cout << "time elapsed in GPU kernel ms: " << gpu_time << endl;
         gpu_ker << gpu_time << endl;
         cout << endl;
@@ -383,11 +383,11 @@ void task3()
         delete[] vec3h;
         delete[] vec3hh;
 
-        cudaFree(vec1d);
-        cudaFree(vec2d);
-        cudaFree(vec3d);
-        cudaEventDestroy(start2);
-        cudaEventDestroy(end2);
+        CUDA_CHECK(cudaFree(vec1d));
+        CUDA_CHECK(cudaFree(vec2d));
+        CUDA_CHECK(cudaFree(vec3d));
+        CUDA_CHECK(cudaEventDestroy(start2));
+        CUDA_CHECK(cudaEventDestroy(end2));
 
     }
     gpu_ker.close();
@@ -403,8 +403,8 @@ void task4()
     for (int i = 0; i < Ns.size(); i++)
     {
         cudaEvent_t  cstart, cend;
-        cudaEventCreate(&cstart);
-        cudaEventCreate(&cend);
+        CUDA_CHECK( cudaEventCreate(&cstart));
+        CUDA_CHECK(cudaEventCreate(&cend));
         float ker_time = 0;
 
         int n = Ns[i];
@@ -417,13 +417,13 @@ void task4()
         auto start = chrono::high_resolution_clock::now();
         SYNC_D
         thrust::device_vector<float> da = ha, db = hb, dc(n);
-        cudaEventRecord(cstart);
+        CUDA_CHECK(cudaEventRecord(cstart));
         thrust::transform(da.begin(), da.end(), db.begin(), dc.begin(), thrust::plus<float>());
-        cudaEventRecord(cend);
+        CUDA_CHECK(cudaEventRecord(cend));
         hc = dc;
         SYNC_D
         auto end = chrono::high_resolution_clock::now();
-        cudaEventElapsedTime(&ker_time, cstart, cend);
+        CUDA_CHECK(cudaEventElapsedTime(&ker_time, cstart, cend));
         gpu_ker << ker_time << "; ";
         auto time_elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
         gpu_ker << ((float)time_elapsed) << endl;
